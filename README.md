@@ -191,4 +191,95 @@ Invalid trip lengths return HTTP `400`. Invalid or missing request fields are re
 - **HTTP `400`:** Check that the end date is after the start date and that the trip is no longer than 14 days.
 - **External API errors:** Check the server terminal for provider/network errors and verify that the provider credentials configured in the service modules are valid.
 - **No places returned:** Use one of the supported destination keys exactly as written in the data-source list.
+
+## Architecture and request flow
+
+The project is split into a static browser client and an API:
+
+1. `frontend/index.html` provides the trip form and result panels. `frontend/styles.css` contains the responsive day/night themes, and `frontend/app.js` handles validation, API calls, streaming updates, and browser storage.
+2. The browser sends the destination, dates, and base currency to `POST /stream/travel-plan`.
+3. The FastAPI route validates the trip dates and checks that provider keys are configured before starting the stream.
+4. The stream requests weather, places, and currency information in order, sending a progress event before and after each lookup.
+5. The frontend updates the weather cards, places list, and currency converter as each result arrives.
+
+The non-streaming `POST /plan/` route requests weather, places, and currency concurrently and returns one JSON response instead.
+
+## Health and provider configuration
+
+`GET /health` is intended for deployment checks and the frontend's connection indicator. Example response when the server is running but keys are missing:
+
+```json
+{
+  "status": "needs_configuration",
+  "providers": {
+    "weather_configured": false,
+    "currency_configured": false
+  },
+  "missing_configuration": [
+    "WEATHER_API_KEY",
+    "EXCHANGE_RATE_API_KEY"
+  ]
+}
+```
+
+With valid configured values, `status` is `ok`, both provider flags are `true`, and `missing_configuration` is empty. The endpoint reports only whether values are present; it never returns the values themselves. A reachable API with missing provider settings is different from an offline API.
+
+Planning endpoints return HTTP `503 Service Unavailable` with setup instructions when keys are absent or still have the example `your_...` value. Add real keys to the project-root `.env` for local use, or to the backend host's secret environment settings in production. Restart the backend after changing local environment settings.
+
+## Frontend behavior and browser storage
+
+- **Day/night theme:** The first visit follows the browser's system color preference. A theme explicitly selected with the header toggle is remembered as `yatra-theme` in local storage.
+- **Recent trips:** The trip shelf stores up to four recent searches under `yatra-recent-trips`. Selecting one restores its destination, dates, and currency. This data is local to the current browser and is not uploaded or synchronized.
+- **Currency estimate:** After rates arrive, the converter multiplies the entered amount by the returned rate for the chosen target currency. It is an estimate, not a payment or card exchange quote.
+- **Connection status:** The header checks `GET /health`. It distinguishes an offline API from an API that is reachable but needs provider configuration.
+- **Live results:** The streaming endpoint uses a `fetch` request with a readable response body because the request includes a JSON body. It is not a browser `EventSource` connection.
+
+## SSE event payloads
+
+Each event is sent as `event: <name>` followed by one JSON `data:` line. Progress-only events contain a `message`; completed lookup events contain both a message and a `data` value.
+
+For example:
+
+```text
+event: weather_complete
+data: {"message":"Weather data fetched successfully.","data":[{"date":"2026-12-01","condition":"Sunny","temperature_high":30.0,"temperature_low":22.0,"humidity":70.0,"rain_chance":10.0}]}
+```
+
+The `weather_complete` value is a list of forecast objects, `options_complete` is a list of place objects, and `currency_complete` is an object keyed by target currency code. `complete` signals that all three lookups finished. Provider and network failures can interrupt the stream; check the backend terminal logs if a request reaches the server but cannot finish.
+
+## Deployment notes
+
+### FastAPI backend on Render
+
+For a Render Web Service connected to this repository, use:
+
+- **Root directory:** leave blank (repository root)
+- **Build command:** `pip install -r requirements.txt`
+- **Start command:** `uvicorn main:app --app-dir app --host 0.0.0.0 --port $PORT`
+- **Environment variables:** `WEATHER_API_KEY` and `EXCHANGE_RATE_API_KEY`
+
+After deployment, open `https://<your-api-host>/health` and confirm that it returns `"status": "ok"`. Provider keys belong in the host's environment settings, not in `frontend/config.js`, the Pages workflow, or committed source files.
+
+### GitHub Pages frontend workflow
+
+The workflow uploads only the contents of `frontend/`; the API code is not deployed to Pages. It runs on pushes to `main` that change `frontend/**` or the Pages workflow itself, and can also be started manually from the repository's **Actions** tab. README-only commits do not trigger this workflow.
+
+Set the repository's Pages deployment source to **GitHub Actions** in **Settings → Pages**. Set `apiBaseUrl` in `frontend/config.js` to the public HTTPS backend URL before publishing. The browser sends requests directly to that URL, so the API must allow cross-origin browser requests and be publicly reachable over HTTPS.
+
+### Run the frontend locally
+
+From the repository root, start the API in one terminal. In a second terminal, serve the static frontend:
+
+```bash
+python -m http.server 5173 --directory frontend
+```
+
+Then open `http://127.0.0.1:5173/`. Serving the directory over HTTP (instead of opening the file directly) gives the browser a consistent local origin for requests and local storage.
+
+## Security and privacy reminders
+
+- `.env` is excluded by `.gitignore`; keep real API keys there locally and in the backend host's secret settings in production.
+- `frontend/config.js` is public client-side configuration. It should contain only the API base URL, never provider secrets.
+- The frontend stores recent trip searches and the theme choice in the visitor's browser local storage. Avoid using this browser storage on a shared device if the saved destinations or dates are sensitive.
+- Rotate provider credentials if they were ever committed to Git or shared publicly.
 #
