@@ -26,7 +26,7 @@ app/
     ├── currency.py         # Exchange-rate API client
     ├── places.py           # Local places catalog
     └── weather.py          # Weather forecast API client
-requirement.txt             # Pinned Python dependencies
+requirements.txt            # Pinned Python dependencies
 ```
 
 The route and service imports currently treat `app/` as the Python import root. Start the server from the project root using the command below, which adds `app/` to the import path.
@@ -43,7 +43,7 @@ From the project root, create and activate a virtual environment, then install t
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
-python -m pip install -r requirement.txt
+python -m pip install -r requirements.txt
 ```
 
 ### macOS or Linux
@@ -51,7 +51,7 @@ python -m pip install -r requirement.txt
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirement.txt
+python -m pip install -r requirements.txt
 ```
 
 Create a local `.env` from the template and add your provider credentials:
