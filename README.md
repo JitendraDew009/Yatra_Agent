@@ -191,5 +191,4 @@ Invalid trip lengths return HTTP `400`. Invalid or missing request fields are re
 - **HTTP `400`:** Check that the end date is after the start date and that the trip is no longer than 14 days.
 - **External API errors:** Check the server terminal for provider/network errors and verify that the provider credentials configured in the service modules are valid.
 - **No places returned:** Use one of the supported destination keys exactly as written in the data-source list.
-#   Y a t r a _ A g e n t  
- 
+#
