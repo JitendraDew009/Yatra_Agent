@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f1">
+    <meta name="description" content="Plan a better trip with destination ideas, local highlights, weather, and currency rates in one place.">
+    <title>Yatra — Make room for the good stuff</title>
+    <link rel="stylesheet" href="./styles.css?v=2">
+    <script src="./config.js"></script>
+    <script src="./app.js?v=2" defer></script>
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Yatra home">
+        <span class="brand-mark" aria-hidden="true">y</span>
+        <span>yatra<span class="brand-period">.</span></span>
+      </a>
+      <nav class="top-nav" aria-label="Main navigation">
+        <a href="#planner">Plan a trip</a>
+        <a href="#your-trips">Your trip shelf</a>
+      </nav>
+      <button class="theme-toggle" id="theme-toggle" type="button" aria-label="Switch to night mode" aria-pressed="false" title="Switch to night mode">
+        <span class="theme-icon" id="theme-icon" aria-hidden="true">☾</span>
+        <span class="theme-label" id="theme-label">Night</span>
+      </button>
+      <div class="connection" id="connection-indicator" role="status">
+        <span class="connection-dot"></span>
+        <span id="connection-label">Checking connection</span>
+      </div>
+    </header>
+    <main>
+      <section class="hero page-width" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-sparkle">✳</span> YOUR NEXT CHAPTER, WELL PLANNED</div>
+          <h1 id="hero-title">A little planning.<br><span>A lot more living.</span></h1>
+          <p>Find your next favourite place. Get the useful details. Leave the overthinking at home.</p>
+          <div class="hero-proof">
+            <span><span class="proof-icon">↗</span> Thoughtful trip ideas</span>
+            <span><span class="proof-icon">☼</span> Weather at a glance</span>
+            <span><span class="proof-icon">◎</span> Money made simple</span>
+          </div>
+        </div>
+
+        <div class="hero-art" aria-label="Illustration of a sunny mountain and lake getaway" role="img">
+          <div class="sun"></div>
+          <div class="art-cloud cloud-one"></div>
+          <div class="art-cloud cloud-two"></div>
+          <div class="mountain mountain-back"></div>
+          <div class="mountain mountain-front"></div>
+          <div class="lake"></div>
+          <div class="art-caption"><span class="caption-pin">⌖</span><span><strong>Somewhere slower</strong><small>It looks good on you</small></span><span class="caption-arrow">↗</span></div>
+          <div class="art-stamp"><span>GO<br>WANDER</span><b>✳</b></div>
+        </div>
+      </section>
+
+      <section class="planner-section page-width" id="planner" aria-labelledby="planner-title">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">THE FUN PART STARTS HERE</div>
+            <h2 id="planner-title">Where to next?</h2>
+          </div>
+          <span class="step-note"><span>01</span> Tell us the basics</span>
+        </div>
+
+        <form class="planner-form" id="trip-form">
+          <label class="field destination-field">
+            <span class="field-label">I’m dreaming of</span>
+            <span class="input-wrap"><span class="input-icon" aria-hidden="true">⌖</span>
+              <input id="destination" name="destination" type="text" list="destination-suggestions" placeholder="A city, beach, or somewhere new" autocomplete="off" required>
+            </span>
+            <datalist id="destination-suggestions">
+              <option value="goa"></option>
+              <option value="jaipur"></option>
+              <option value="manali"></option>
+              <option value="chhattisgarh"></option>
+              <option value="hyderabad"></option>
+              <option value="mumbai"></option>
+            </datalist>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Leaving on</span>
+            <span class="input-wrap"><span class="input-icon" aria-hidden="true">↗</span>
+              <input id="start-date" name="start_date" type="date" required>
+            </span>
+          </label>
+
+          <label class="field">
+            <span class="field-label">Back by</span>
+            <span class="input-wrap"><span class="input-icon" aria-hidden="true">↙</span>
+              <input id="end-date" name="end_date" type="date" required>
+            </span>
+          </label>
+
+          <label class="field currency-field">
+            <span class="field-label">My currency</span>
+            <span class="input-wrap"><span class="input-icon currency-symbol" aria-hidden="true">₹</span>
+              <select id="base-currency" name="base_currency" aria-label="Base currency">
+                <option value="INR">INR · Rupee</option>
+                <option value="USD">USD · US Dollar</option>
+                <option value="EUR">EUR · Euro</option>
+                <option value="GBP">GBP · Pound</option>
+                <option value="AED">AED · Dirham</option>
+                <option value="JPY">JPY · Yen</option>
+                <option value="AUD">AUD · Australian Dollar</option>
+                <option value="CAD">CAD · Canadian Dollar</option>
+                <option value="SGD">SGD · Singapore Dollar</option>
+              </select>
+            </span>
+          </label>
+
+          <button class="primary-button" id="plan-button" type="submit">
+            <span>Plan my getaway</span><span class="button-arrow" aria-hidden="true">↗</span>
+          </button>
+        </form>
+
+        <div class="form-footer">
+          <span class="trip-length" id="trip-length">Pick your dates to see trip length</span>
+          <span class="date-note">A good trip can be 1–14 days</span>
+        </div>
+        <p class="form-error" id="form-error" role="alert" hidden></p>
+      </section>
+
+      <section class="results-section page-width" id="trip-results" aria-live="polite" hidden>
+        <div class="results-heading">
+          <div>
+            <div class="eyebrow">YOUR LITTLE ESCAPE, TAKING SHAPE</div>
+            <h2 id="results-title">Your trip at a glance</h2>
+            <p class="results-subtitle" id="results-subtitle"></p>
+          </div>
+          <span class="live-badge" id="plan-status"><span class="live-dot"></span> Planning your trip</span>
+        </div>
+
+        <div class="progress-panel" id="progress-panel">
+          <div class="progress-top"><span class="progress-icon" id="progress-icon">✳</span><span id="progress-message">Getting the good bits together…</span></div>
+          <div class="progress-track"><span id="progress-bar"></span></div>
+          <div class="progress-steps" id="progress-steps">
+            <span data-step="weather">Weather</span><span data-step="places">Places</span><span data-step="currency">Currency</span>
+          </div>
+        </div>
+
+        <div class="results-grid">
+          <section class="result-card weather-card" aria-labelledby="weather-title">
+            <div class="card-heading">
+              <span class="card-icon weather-icon">☼</span>
+              <div><h3 id="weather-title">A look at the weather</h3><p>Your forecast, day by day</p></div>
+            </div>
+            <div class="weather-list" id="weather-list"><p class="empty-state">Weather will show up here.</p></div>
+          </section>
+
+          <section class="result-card currency-card" aria-labelledby="currency-title">
+            <div class="card-heading">
+              <span class="card-icon currency-icon">↔</span>
+              <div><h3 id="currency-title">Money, made easy</h3><p>Quick currency check</p></div>
+            </div>
+            <div class="converter">
+              <label for="convert-amount">You have</label>
+              <div class="converter-input"><input id="convert-amount" type="number" min="0" step="any" value="100" inputmode="decimal"><span id="from-currency">INR</span></div>
+              <div class="converter-divider"><span>↓</span><span class="rate-caption" id="rate-caption">Rates update with your plan</span></div>
+              <label for="convert-target">That’s about</label>
+              <div class="converter-input result-input"><output id="converted-amount">—</output>
+                <select id="convert-target" aria-label="Convert to currency">
+                  <option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="INR">INR</option><option value="AED">AED</option><option value="JPY">JPY</option><option value="AUD">AUD</option><option value="CAD">CAD</option><option value="SGD">SGD</option>
+                </select>
+              </div>
+            </div>
+            <p class="disclaimer">A handy estimate, not a live payment quote.</p>
+          </section>
+        </div>
+
+        <section class="result-card places-card" aria-labelledby="places-title">
+          <div class="places-heading">
+            <div class="card-heading">
+              <span class="card-icon places-icon">✿</span>
+              <div><h3 id="places-title">Worth making time for</h3><p>A few lovely places to get you started</p></div>
+            </div>
+            <span class="places-count" id="places-count"></span>
+          </div>
+          <div class="places-grid" id="places-list"><p class="empty-state">Local favourites will show up here.</p></div>
+        </section>
+        <p class="results-error" id="results-error" role="alert" hidden></p>
+      </section>
+
+      <section class="trip-shelf page-width" id="your-trips">
+        <div class="shelf-copy">
+          <div class="eyebrow">A LITTLE INSPIRATION, SAVED</div>
+          <h2>Your trip shelf</h2>
+          <p>Your recent searches stay right here on this device. Pick up where the daydream left off.</p>
+        </div>
+        <div class="saved-trips" id="saved-trips">
+          <div class="shelf-empty"><span>✳</span><p>Your next favourite trip could go here.</p></div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer page-width">
+      <a class="brand footer-brand" href="#"><span class="brand-mark" aria-hidden="true">y</span><span>yatra<span class="brand-period">.</span></span></a>
+      <span class="creator-credit">Developed &amp; created by <strong>Jitendra Dewangan</strong></span>
+      <a href="#planner" class="back-top">Back to the good part ↑</a>
+    </footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
